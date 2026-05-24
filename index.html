@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>reloop — 智慧回收平台</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+  <!-- 登入頁 -->
+  <div id="auth-screen">
+    <div class="auth-wrap">
+      <div class="auth-left">
+        <div class="auth-blob"></div>
+        <div class="auth-left-inner">
+          <div class="logo-row">
+            <div class="logo-icon">♻</div>
+            <span class="logo-name">reloop</span>
+          </div>
+          <h2 class="auth-headline">讓回收變成一種<br/>無限循環的美學</h2>
+          <p class="auth-sub">利用 AI 影像辨識與點數激勵系統，<br/>與 reloop 一起打造永續的城市生活環境。</p>
+          <div class="auth-users">
+            <div class="avatar-stack">
+              <div class="av">U1</div><div class="av">U2</div><div class="av">U3</div>
+            </div>
+            <span>+2,400 位夥伴已加入</span>
+          </div>
+        </div>
+      </div>
+      <div class="auth-right">
+        <div id="auth-form-wrap">
+          <h3 id="auth-title">歡迎回到 reloop</h3>
+          <p id="auth-sub2">請登入您的帳號以查看回收數據</p>
+          <form id="auth-form">
+            <label>電子郵件</label>
+            <input type="email" placeholder="example@reloop.com" required/>
+            <label>密碼</label>
+            <input type="password" placeholder="••••••••" required/>
+            <button type="submit" class="btn-primary" id="auth-submit">進入系統</button>
+          </form>
+          <p class="auth-switch">
+            <span id="auth-switch-text">還沒有帳號嗎？</span>
+            <button onclick="toggleAuth()" id="auth-switch-btn">註冊 reloop</button>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主應用 -->
+  <div id="app" style="display:none">
+    <aside class="sidebar">
+      <div class="logo-row sidebar-logo">
+        <div class="logo-icon">♻</div>
+        <span class="logo-name">reloop</span>
+      </div>
+      <nav class="nav">
+        <button class="nav-item active" data-page="dashboard">🏠 控制主頁</button>
+        <button class="nav-item" data-page="scan">📷 AI 掃描辨識</button>
+        <button class="nav-item" data-page="stats">📊 回收統計趨勢</button>
+        <button class="nav-item" data-page="rewards">🏆 獎勵中心</button>
+      </nav>
+      <div class="sidebar-user">
+        <div class="avatar">RC</div>
+        <div class="user-info">
+          <div class="user-name">Ricky Chen</div>
+          <div class="user-rank">PRO ✦</div>
+        </div>
+        <button class="settings-btn" onclick="toggleSettings()">⚙️</button>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <span class="topbar-label" id="topbar-label">Overview</span>
+        <div class="cam-badge">
+          <div class="dot"></div>
+          CAM：連線中
+        </div>
+      </header>
+      <div class="content" id="content">
+        <!-- 頁面由 JS 動態載入 -->
+      </div>
+    </div>
+
+    <!-- 設定面板 -->
+    <div class="settings-overlay" id="settings-overlay" onclick="toggleSettings()"></div>
+    <div class="settings-drawer" id="settings-drawer">
+      <div class="settings-header">
+        <span>系統設定</span>
+        <button onclick="toggleSettings()">✕</button>
+      </div>
+      <div class="settings-section">
+        <div class="settings-label">顯示主題</div>
+        <div class="theme-btns">
+          <button onclick="setTheme('light')" id="btn-light" class="theme-btn active">☀️ 淺色</button>
+          <button onclick="setTheme('dark')" id="btn-dark" class="theme-btn">🌙 深色</button>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-label">自動辨識模式</div>
+        <label class="toggle-wrap">
+          <input type="checkbox" id="auto-mode"/>
+          <span class="toggle"></span>
+          <span class="toggle-label">開啟後每 3 秒自動掃描</span>
+        </label>
+      </div>
+      <button class="btn-logout" onclick="logout()">🚪 登出 reloop</button>
+    </div>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/pages/dashboard.js"></script>
+  <script src="js/pages/scan.js"></script>
+  <script src="js/pages/stats.js"></script>
+  <script src="js/pages/rewards.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
