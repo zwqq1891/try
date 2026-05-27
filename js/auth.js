@@ -9,9 +9,13 @@ function toggleAuth() {
   document.getElementById('auth-submit').textContent = isRegister ? '立即註冊' : '進入系統';
   document.getElementById('auth-switch-text').textContent = isRegister ? '已經有帳號了？' : '還沒有帳號嗎？';
   document.getElementById('auth-switch-btn').textContent = isRegister ? '登入帳號' : '註冊 reloop';
+  document.getElementById('name-field').style.display = isRegister ? 'block' : 'none';
+  document.getElementById('auth-name').required = isRegister;
+  showAuthMessage('');
 }
 
 function logout() {
+  clearSession();
   document.getElementById('app').style.display = 'none';
   document.getElementById('auth-screen').style.display = 'flex';
   toggleSettings(true);

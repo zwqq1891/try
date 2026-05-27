@@ -4,6 +4,89 @@ let scanning = false;
 let autoScanEnabled = false;
 let countdownInterval = null;
 let countdownSec = 3;
+let selectedWasteId = 'pet-bottle';
+let latestScanResult = null;
+
+const WASTE_CATALOG = [
+  {
+    id: 'pet-bottle',
+    name: 'PET 寶特瓶',
+    material: '塑膠類',
+    size: '中型',
+    cleanliness: '乾淨',
+    bin: '塑膠回收桶',
+    basePoints: 40,
+    sizeMultiplier: 1,
+    cleanlinessMultiplier: 1,
+    confidence: 94,
+    note: '請先倒空內容物，瓶身壓扁後再投入塑膠回收桶。'
+  },
+  {
+    id: 'aluminum-can',
+    name: '鋁罐',
+    material: '金屬類',
+    size: '小型',
+    cleanliness: '乾淨',
+    bin: '金屬回收桶',
+    basePoints: 60,
+    sizeMultiplier: 0.8,
+    cleanlinessMultiplier: 1,
+    confidence: 96,
+    note: '請確認罐內已排空，壓扁後可提升桶內收納效率。'
+  },
+  {
+    id: 'cardboard',
+    name: '紙板',
+    material: '紙類',
+    size: '大型',
+    cleanliness: '乾淨',
+    bin: '紙類回收桶',
+    basePoints: 25,
+    sizeMultiplier: 1.3,
+    cleanlinessMultiplier: 1,
+    confidence: 91,
+    note: '請攤平或摺疊紙板，避免混入膠帶、食物殘渣與油污。'
+  },
+  {
+    id: 'glass-bottle',
+    name: '玻璃瓶',
+    material: '玻璃類',
+    size: '中型',
+    cleanliness: '乾淨',
+    bin: '玻璃回收桶',
+    basePoints: 45,
+    sizeMultiplier: 1,
+    cleanlinessMultiplier: 1,
+    confidence: 93,
+    note: '請清空瓶內液體，保持瓶身完整，避免破裂造成清運風險。'
+  },
+  {
+    id: 'oily-lunchbox',
+    name: '有油污餐盒',
+    material: '污染回收物',
+    size: '中型',
+    cleanliness: '嚴重油污',
+    bin: '一般垃圾桶',
+    basePoints: 25,
+    sizeMultiplier: 1,
+    cleanlinessMultiplier: 0,
+    confidence: 88,
+    note: '油污會降低回收純淨度，未清洗前不發放回收點數。'
+  },
+  {
+    id: 'general-waste',
+    name: '一般垃圾',
+    material: '不可回收物',
+    size: '中型',
+    cleanliness: '不適用',
+    bin: '一般垃圾桶',
+    basePoints: 0,
+    sizeMultiplier: 1,
+    cleanlinessMultiplier: 0,
+    confidence: 90,
+    note: '此品項不屬於資源回收範圍，請投入一般垃圾桶。'
+  }
+];
 
 function renderScan(container) {
   scanning = false;
@@ -63,7 +146,15 @@ function renderScan(container) {
         <div class="scan-idle" id="scan-idle">
           <div class="scan-idle-icon">📷</div>
           <div class="scan-idle-title">reloop Vision AI</div>
-          <div class="scan-idle-sub">將垃圾放在鏡頭前，<br/>按下按鈕開始辨識</div>
+          <div class="scan-idle-sub">選擇展示品項後開始辨識，<br/>系統會依材質、大小與清潔度計算點數</div>
+          <div class="waste-selector">
+            ${WASTE_CATALOG.map(item => `
+              <button class="waste-option ${item.id === selectedWasteId ? 'active' : ''}" onclick="selectWasteDemo('${item.id}')">
+                <span>${item.name}</span>
+                <small>${item.material}</small>
+              </button>
+            `).join('')}
+          </div>
           <button class="scan-btn" id="scan-btn" onclick="startScan()">啟動辨識</button>
         </div>
 
@@ -79,31 +170,78 @@ function renderScan(container) {
           </label>
         </div>
 
-        <div class="scan-result" id="scan-result">
-          <div class="result-type">金屬罐（Aluminum Can）</div>
-          <div class="result-grid">
-            <div class="result-stat">
-              <div class="result-stat-label">Confidence</div>
-              <div class="result-stat-val">99.2%</div>
-            </div>
-            <div class="result-stat green">
-              <div class="result-stat-label">Reward</div>
-              <div class="result-stat-val">+25 CCN</div>
-            </div>
-          </div>
-          <div style="background:#f0fdf4;border-radius:12px;padding:14px;font-size:12.5px;color:#166534;margin-bottom:16px;line-height:1.6">
-            💡 請確認罐內已排空，並盡量壓扁以利存放。
-          </div>
-          <div class="result-actions">
-            <button class="btn-retry" onclick="resetScan()">重試</button>
-            <button class="btn-confirm" onclick="confirmScan()">確認投入系統 ✓</button>
-          </div>
-        </div>
+        <div class="scan-result" id="scan-result"></div>
       </div>
     </div>
   `;
 
   startCamera();
+}
+
+function calculatePoints(item) {
+  return Math.round(item.basePoints * item.sizeMultiplier * item.cleanlinessMultiplier);
+}
+
+function selectWasteDemo(itemId) {
+  selectedWasteId = itemId;
+  document.querySelectorAll('.waste-option').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('onclick').includes(itemId));
+  });
+}
+
+function getSelectedWaste() {
+  return WASTE_CATALOG.find(item => item.id === selectedWasteId) || WASTE_CATALOG[0];
+}
+
+function renderScanResult(item) {
+  const points = calculatePoints(item);
+  const result = document.getElementById('scan-result');
+  if (!result) return;
+
+  latestScanResult = { ...item, points };
+  result.innerHTML = `
+    <div class="result-kicker">辨識結果</div>
+    <div class="result-type">${item.name}</div>
+    <div class="result-grid result-grid-4">
+      <div class="result-stat">
+        <div class="result-stat-label">材質</div>
+        <div class="result-stat-val">${item.material}</div>
+      </div>
+      <div class="result-stat">
+        <div class="result-stat-label">大小</div>
+        <div class="result-stat-val">${item.size}</div>
+      </div>
+      <div class="result-stat">
+        <div class="result-stat-label">清潔度</div>
+        <div class="result-stat-val">${item.cleanliness}</div>
+      </div>
+      <div class="result-stat green">
+        <div class="result-stat-label">Reward</div>
+        <div class="result-stat-val">+${points} CCN</div>
+      </div>
+    </div>
+    <div class="result-rule">
+      <div>
+        <strong>點數公式</strong>
+        <span>${item.basePoints} 基礎分 × ${item.sizeMultiplier} 大小倍率 × ${item.cleanlinessMultiplier} 清潔度倍率 = ${points} CCN</span>
+      </div>
+      <div>
+        <strong>建議投放</strong>
+        <span>${item.bin}</span>
+      </div>
+      <div>
+        <strong>信心分數</strong>
+        <span>${item.confidence}%</span>
+      </div>
+    </div>
+    <div class="${points > 0 ? 'result-tip' : 'result-tip warning'}">
+      ${item.note}
+    </div>
+    <div class="result-actions">
+      <button class="btn-retry" onclick="resetScan()">重試</button>
+      <button class="btn-confirm" id="confirm-scan-btn" onclick="confirmScan()">確認投入系統 ✓</button>
+    </div>
+  `;
 }
 
 async function startCamera() {
@@ -182,6 +320,7 @@ function startScan(fromAuto) {
 
   setTimeout(() => {
     if (overlay) overlay.classList.remove('active');
+    renderScanResult(getSelectedWaste());
     const idle = document.getElementById('scan-idle');
     const autoRow = document.getElementById('auto-scan-row');
     const result = document.getElementById('scan-result');
@@ -202,6 +341,7 @@ function resetScan() {
   if (autoRow) autoRow.style.display = '';
   if (result) result.classList.remove('show');
   if (btn) btn.disabled = false;
+  latestScanResult = null;
 
   // 若自動模式仍開著，重新倒計時
   if (autoScanEnabled) {
@@ -209,12 +349,32 @@ function resetScan() {
   }
 }
 
-function confirmScan() {
+async function confirmScan() {
   autoScanEnabled = false;
   clearCountdown();
   scanning = false;
-  const toggle = document.getElementById('auto-scan-toggle');
-  if (toggle) toggle.checked = false;
-  resetScan();
-  switchPage('dashboard');
+  const confirmBtn = document.getElementById('confirm-scan-btn');
+  if (confirmBtn) confirmBtn.disabled = true;
+
+  try {
+    if (latestScanResult) {
+      const record = await apiRequest('/api/records', {
+        method: 'POST',
+        body: {
+          itemId: latestScanResult.id,
+          size: latestScanResult.size,
+          cleanliness: latestScanResult.cleanliness,
+          confidence: latestScanResult.confidence
+        }
+      });
+      alert(`已記錄：${record.name}\n投放桶：${record.bin}\n獲得點數：${record.points} CCN`);
+    }
+    const toggle = document.getElementById('auto-scan-toggle');
+    if (toggle) toggle.checked = false;
+    resetScan();
+    switchPage('dashboard');
+  } catch (error) {
+    alert(`寫入回收紀錄失敗：${error.message}`);
+    if (confirmBtn) confirmBtn.disabled = false;
+  }
 }

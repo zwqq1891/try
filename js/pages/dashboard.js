@@ -6,19 +6,19 @@ function renderDashboard(container) {
       <div class="card card-dark">
         <div class="stat-icon" style="background:rgba(255,255,255,.1)">⚡</div>
         <div class="stat-label" style="color:#fff">碳幣餘額</div>
-        <div class="stat-value">12,840 <span class="stat-unit">CCN</span></div>
+        <div class="stat-value" id="dash-coins">-- <span class="stat-unit">CCN</span></div>
       </div>
       <div class="card">
         <div class="stat-icon" style="background:#eff6ff">📦</div>
         <div class="stat-label">本月回收</div>
-        <div class="stat-value">42.5 <span class="stat-unit">KG</span></div>
-        <div class="stat-trend trend-up">+15%</div>
+        <div class="stat-value" id="dash-recycled">-- <span class="stat-unit">KG</span></div>
+        <div class="stat-trend trend-up" id="dash-records">-- 筆紀錄</div>
       </div>
       <div class="card">
         <div class="stat-icon" style="background:#dcfce7">🌱</div>
         <div class="stat-label">碳足跡減少</div>
-        <div class="stat-value">156.8 <span class="stat-unit">KG CO₂</span></div>
-        <div class="stat-trend trend-down">-8.2%</div>
+        <div class="stat-value" id="dash-carbon">-- <span class="stat-unit">KG CO₂</span></div>
+        <div class="stat-trend trend-up">本月累積</div>
       </div>
     </div>
 
@@ -64,21 +64,44 @@ function renderDashboard(container) {
             <th style="text-align:right">獲得點數</th>
           </tr>
         </thead>
-        <tbody>
-          ${[
-            {time:'14:20', name:'鋁罐回收套組', pts:'+45 CCN'},
-            {time:'11:05', name:'PET 塑膠瓶',   pts:'+75 CCN'},
-            {time:'09:33', name:'紙板紙盒',       pts:'+30 CCN'},
-            {time:'昨天',  name:'玻璃罐回收',     pts:'+20 CCN'}
-          ].map(r => `
-            <tr>
-              <td style="color:var(--muted);font-size:13px">${r.time}</td>
-              <td style="font-weight:600">${r.name}</td>
-              <td class="points-badge">${r.pts}</td>
-            </tr>
-          `).join('')}
+        <tbody id="activity-rows">
+          <tr>
+            <td colspan="3" class="inline-muted">正在讀取回收紀錄...</td>
+          </tr>
         </tbody>
       </table>
     </div>
   `;
+
+  loadDashboardSummary();
+}
+
+async function loadDashboardSummary() {
+  try {
+    const summary = await apiRequest('/api/summary');
+    document.getElementById('dash-coins').innerHTML =
+      `${Number(summary.carbonCoins).toLocaleString()} <span class="stat-unit">CCN</span>`;
+    document.getElementById('dash-recycled').innerHTML =
+      `${Number(summary.monthlyRecycledKg).toFixed(2)} <span class="stat-unit">KG</span>`;
+    document.getElementById('dash-carbon').innerHTML =
+      `${Number(summary.monthlyCarbonReducedKg).toFixed(2)} <span class="stat-unit">KG CO₂</span>`;
+    document.getElementById('dash-records').textContent = `${summary.monthlyRecords} 筆紀錄`;
+
+    const rows = document.getElementById('activity-rows');
+    if (!summary.recentRecords.length) {
+      rows.innerHTML = '<tr><td colspan="3" class="inline-muted">還沒有回收紀錄，先到 AI 掃描頁新增一筆。</td></tr>';
+      return;
+    }
+
+    rows.innerHTML = summary.recentRecords.map(record => `
+      <tr>
+        <td style="color:var(--muted);font-size:13px">${new Date(record.created_at).toLocaleString('zh-TW', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</td>
+        <td style="font-weight:600">${record.item_name} <span style="color:var(--muted);font-weight:500">/${record.material}</span></td>
+        <td class="points-badge">+${record.points_earned} CCN</td>
+      </tr>
+    `).join('');
+  } catch (error) {
+    document.getElementById('activity-rows').innerHTML =
+      `<tr><td colspan="3"><div class="inline-error">讀取後端失敗：${error.message}</div></td></tr>`;
+  }
 }
