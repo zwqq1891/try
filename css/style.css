@@ -103,6 +103,30 @@ body {
 .auth-switch { margin-top: 24px; font-size: 13px; color: var(--muted); text-align: center; }
 .auth-switch button { background: none; border: none; color: var(--green); font-weight: 700; cursor: pointer; margin-left: 6px; }
 .auth-switch button:hover { text-decoration: underline; }
+.auth-message {
+  min-height: 18px;
+  margin-top: 12px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+.auth-message.error { color: var(--danger); }
+.auth-message.success { color: var(--green); }
+.inline-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  color: #991b1b;
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+}
+.inline-muted {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
 
 /* ===== BUTTONS ===== */
 .btn-primary {
@@ -252,6 +276,43 @@ body.dark .card-dark { background: #1f2937; border-color: #374151; }
 .scan-idle-icon { font-size: 40px; color: #d1d5db; }
 .scan-idle-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; letter-spacing: -1px; }
 .scan-idle-sub { font-size: 13px; color: var(--muted); line-height: 1.6; }
+.waste-selector {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 4px 0 6px;
+}
+.waste-option {
+  min-height: 58px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 10px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .2s, background .2s, transform .1s;
+}
+.waste-option:hover { border-color: var(--green); transform: translateY(-1px); }
+.waste-option.active {
+  background: var(--green-light);
+  border-color: var(--green);
+}
+body.dark .waste-option.active { background: rgba(22,163,74,.15); }
+.waste-option span {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.waste-option small {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 10.5px;
+  font-weight: 700;
+}
 .scan-btn {
   background: var(--green); color: #fff; border: none; border-radius: 14px;
   padding: 16px 40px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 8px; transition: background .2s;
@@ -260,13 +321,59 @@ body.dark .card-dark { background: #1f2937; border-color: #374151; }
 .scan-btn:disabled { opacity: .4; cursor: not-allowed; }
 .scan-result { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 24px; display: none; }
 .scan-result.show { display: block; animation: fadein .3s ease; }
+.result-kicker {
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
 .result-type { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; margin-bottom: 16px; color: var(--text); }
 .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+.result-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .result-stat { background: var(--bg); border-radius: 12px; padding: 14px; text-align: center; }
 .result-stat.green { background: #dcfce7; }
 .result-stat-label { font-size: 10px; font-weight: 700; letter-spacing: .5px; color: var(--muted); text-transform: uppercase; margin-bottom: 4px; }
-.result-stat-val { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: var(--text); }
+.result-stat-val { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; color: var(--text); line-height: 1.2; }
 .result-stat.green .result-stat-val { color: var(--green-dark); }
+.result-rule {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.result-rule div {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.result-rule strong {
+  flex-shrink: 0;
+  color: var(--text);
+}
+.result-rule span {
+  color: var(--muted);
+  text-align: right;
+}
+.result-tip {
+  background: #f0fdf4;
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 12.5px;
+  color: #166534;
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+.result-tip.warning {
+  background: #fff7ed;
+  color: #9a3412;
+}
 .result-actions { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; }
 .btn-retry { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 14px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--muted); }
 .btn-confirm {
@@ -371,4 +478,147 @@ body.dark .auto-scan-row.auto-active { background: rgba(22,163,74,.12); }
   .grid-2 { grid-template-columns: 1fr; }
   .scan-layout { grid-template-columns: 1fr; }
   .rewards-grid { grid-template-columns: 1fr; }
+  .waste-selector { grid-template-columns: 1fr; }
+  .result-rule div { display: block; }
+  .result-rule span { display: block; text-align: left; margin-top: 3px; }
+}
+/* ===== ========================================= ===== */
+/* =====  手機版專用優化 (貼在最底部，不影響電腦版)  ===== */
+/* ===== ========================================= ===== */
+
+/* 預設在電腦版時，隱藏手機版才需要的頂底導覽列 */
+.mobile-header, .mobile-nav { display: none; }
+
+@media (max-width: 768px) {
+  /* --- 1. 隱藏電腦版元素，改用手機版配置 --- */
+  .sidebar { display: none !important; }
+  .topbar { display: none !important; }
+  
+  #app { 
+    flex-direction: column; 
+    height: 100vh;
+  }
+  
+  .main { 
+    height: calc(100vh - 120px); 
+    margin-top: 56px; 
+  }
+
+  .content { 
+    padding: 16px; 
+    padding-bottom: 90px; /* 留空避免內容被底部導覽列遮擋 */
+  }
+
+  /* --- 2. 手機版毛玻璃頂部列與底部導覽列 --- */
+  .mobile-header {
+    display: flex;
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 56px;
+    background: var(--sidebar);
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    z-index: 30;
+    transition: background .3s;
+  }
+  .settings-btn-mobile {
+    background: none; border: none; font-size: 20px; cursor: pointer; color: var(--muted);
+  }
+
+  .mobile-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 64px;
+    background: var(--sidebar);
+    border-top: 1px solid var(--border);
+    justify-content: space-around;
+    align-items: center;
+    z-index: 30;
+    padding-bottom: env(safe-area-inset-bottom); /* 相容全螢幕手機底線 */
+    transition: background .3s;
+  }
+  .mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: none; border: none;
+    color: var(--muted);
+    flex: 1; height: 100%;
+    gap: 4px; cursor: pointer;
+  }
+  .mobile-nav-item .nav-icon { font-size: 18px; }
+  .mobile-nav-item .nav-text { font-size: 10px; font-weight: 600; }
+  .mobile-nav-item.active { color: var(--green); }
+  body.dark .mobile-nav-item.active { color: #4ade80; }
+
+  /* --- 3. 登入註冊頁重構 (由橫變直) --- */
+  #auth-screen { padding: 12px; }
+  .auth-wrap {
+    flex-direction: column;
+    border-radius: 24px;
+    min-height: auto;
+    width: 100%;
+  }
+  .auth-left {
+    width: 100%;
+    padding: 32px 24px;
+  }
+  .auth-headline { font-size: 22px; margin: 16px 0 8px; }
+  .auth-sub { font-size: 12px; }
+  .auth-users { margin-top: 20px; }
+  
+  .auth-right {
+    width: 100%;
+    padding: 36px 24px;
+  }
+
+  /* --- 4. 數據卡片與圖表改為單欄直列 --- */
+  .stats-grid { 
+    grid-template-columns: 1fr; 
+    gap: 12px; 
+  }
+  .grid-2 { 
+    grid-template-columns: 1fr; 
+    gap: 16px; 
+  }
+  .bars { height: 110px; gap: 4px; }
+
+  /* --- 5. AI 掃描介面優化 --- */
+  .scan-layout { 
+    grid-template-columns: 1fr; 
+    gap: 16px; 
+  }
+  .cam-frame { 
+    width: 100%;
+    max-width: 340px;
+    margin: 0 auto; 
+  }
+  .waste-selector { 
+    grid-template-columns: 1fr; 
+    gap: 6px;
+  }
+  .result-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .result-rule div { display: flex; flex-direction: row; justify-content: space-between; font-size: 12px; }
+  .result-rule span { text-align: right; margin-top: 0; }
+  .result-actions { grid-template-columns: 1fr; gap: 8px; } /* 按鈕改為直列大按鈕好點擊 */
+
+  /* --- 6. 表格與獎勵中心防爆邊 --- */
+  .tbl th, .tbl td { padding: 12px 14px; font-size: 12px; }
+  .tbl th:nth-child(2), .tbl td:nth-child(2) { display: none; } /* 隱藏次要欄位防止爆出去 */
+  
+  .rewards-grid { 
+    grid-template-columns: 1fr; 
+    gap: 12px; 
+  }
+
+  /* --- 7. 設定側滑選單優化 --- */
+  .settings-drawer {
+    width: 85%;
+    max-width: 280px;
+    padding: 24px 16px;
+  }
 }
